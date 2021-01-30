@@ -1,5 +1,7 @@
 # go-db
 
+Proyecto básico para conectar una base de datos de postgresql y MySql con Go.
+
 ## Migrar tabla de products
 
 ```go
@@ -60,6 +62,21 @@ if err != nil {
 }
 
 fmt.Println(ms)
+```
 
+# Obtener producto por un id
+```go
+storageProduct := storage.NewPsqlProduct(storage.Pool())
+serviceProduct := product.NewService(storageProduct)
 
+m, err := serviceProduct.GetByID(6)
+
+switch {
+case errors.Is(err, sql.ErrNoRows):
+    log.Println("No hay un producto con este id")
+case err != nil:
+    log.Fatalf("product.GetById: %v", err)
+default:
+    fmt.Println(m)
+}
 ```
