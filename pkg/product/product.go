@@ -41,7 +41,7 @@ type Storage interface {
 	Create(*Model) error
 	// Update(*Model) error
 	GetAll() (Models, error)
-	// GetByID(uint) (*Model, error)
+	GetByID(uint) (*Model, error)
 	// Delete(uint) error
 }
 
@@ -69,4 +69,9 @@ func (s *Service) Create(m *Model) error {
 // GetAll is used for get all the products
 func (s *Service) GetAll() (Models, error) {
 	return s.storage.GetAll()
+}
+
+// GetById is used for get a products
+func (s *Service) GetByID(id uint) (*Model, error) {
+	return s.storage.GetByID(id)
 }

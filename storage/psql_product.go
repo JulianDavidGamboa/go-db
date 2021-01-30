@@ -7,6 +7,10 @@ import (
 	"github.com/JulianDavidGamboa/go-db/pkg/product"
 )
 
+type scanner interface {
+	Scan(dest ...interface{}) error
+}
+
 const (
 	psqlMigrateProduct = `CREATE TABLE IF NOT EXISTS go_db.products(
 		id SERIAL NOT NULL,
@@ -21,6 +25,7 @@ const (
 	VALUES($1, $2, $3, $4) RETURNING id`
 	psqlGetAllProduct = `SELECT id, name, observations, price, created_at, updated_at 
 						FROM go_db.products`
+	psqlGetProductByID = psqlGetAllProduct + " WHERE id = $1"
 )
 
 // PsqlProduct used for work with postgres - product
@@ -91,24 +96,11 @@ func (p *PsqlProduct) GetAll() (product.Models, error) {
 
 	ms := make(product.Models, 0)
 	for rows.Next() {
-		m := &product.Model{}
-		observationNull := sql.NullString{}
-		updatedAtNull := sql.NullTime{}
+		m, err := scanRowProduct(rows)
 
-		err := rows.Scan(
-			&m.ID,
-			&m.Name,
-			&observationNull,
-			&m.Price,
-			&m.CreatedAt,
-			&updatedAtNull,
-		)
 		if err != nil {
 			return nil, err
 		}
-
-		m.Observations = observationNull.String
-		m.UpdatedAt = updatedAtNull.Time
 
 		ms = append(ms, m)
 
@@ -119,4 +111,39 @@ func (p *PsqlProduct) GetAll() (product.Models, error) {
 	}
 
 	return ms, nil
+}
+
+// GetByID implement the interface product.Storage
+func (p *PsqlProduct) GetByID(id uint) (*product.Model, error) {
+	stmt, err := p.db.Prepare(psqlGetProductByID)
+	if err != nil {
+		return &product.Model{}, err
+	}
+	defer stmt.Close()
+
+	return scanRowProduct(stmt.QueryRow(id))
+
+}
+
+func scanRowProduct(s scanner) (*product.Model, error) {
+	m := &product.Model{}
+	observationNull := sql.NullString{}
+	updatedAtNull := sql.NullTime{}
+
+	err := s.Scan(
+		&m.ID,
+		&m.Name,
+		&observationNull,
+		&m.Price,
+		&m.CreatedAt,
+		&updatedAtNull,
+	)
+	if err != nil {
+		return &product.Model{}, err
+	}
+
+	m.Observations = observationNull.String
+	m.UpdatedAt = updatedAtNull.Time
+
+	return m, nil
 }
