@@ -25,6 +25,7 @@ if err := serviceInvoiceHeader.Migrate(); err != nil {
 ```
 
 ## Migrar tabla de invoiceitems
+
 ```go
 storageInvoiceItem := storage.NewPsqlInvoiceItem(storage.Pool())
 serviceInvoiceItem := invoiceitem.NewService(storageInvoiceItem)
@@ -35,6 +36,7 @@ if err := serviceInvoiceItem.Migrate(); err != nil {
 ```
 
 # Crear un producto
+
 ```go
 storageProduct := storage.NewPsqlProduct(storage.Pool())
 serviceProduct := product.NewService(storageProduct)
@@ -51,6 +53,7 @@ if err := serviceProduct.Create(m); err != nil {
 ```
 
 # Obtener todos los productos
+
 ```go
 storageProduct := storage.NewPsqlProduct(storage.Pool())
 serviceProduct := product.NewService(storageProduct)
@@ -65,6 +68,7 @@ fmt.Println(ms)
 ```
 
 # Obtener producto por un id
+
 ```go
 storageProduct := storage.NewPsqlProduct(storage.Pool())
 serviceProduct := product.NewService(storageProduct)
@@ -78,5 +82,25 @@ case err != nil:
     log.Fatalf("product.GetById: %v", err)
 default:
     fmt.Println(m)
+}
+```
+
+# Actualizar producto
+
+```go
+storageProduct := storage.NewPsqlProduct(storage.Pool())
+serviceProduct := product.NewService(storageProduct)
+
+m := &product.Model{
+	ID:           2,
+	Name:         "Programacion con GO",
+	Observations: "Programming with go",
+	Price:        125,
+}
+
+err := serviceProduct.Update(m)
+
+if err != nil {
+	log.Fatalf("product.Update: %v", err)
 }
 ```
