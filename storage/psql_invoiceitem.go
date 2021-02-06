@@ -3,6 +3,8 @@ package storage
 import (
 	"database/sql"
 	"log"
+
+	"github.com/JulianDavidGamboa/go-db/pkg/invoiceitem"
 )
 
 const (
@@ -19,6 +21,8 @@ const (
 		CONSTRAINT invoice_items_invoice_product_id_fk FOREIGN KEY (product_id) 
 		REFERENCES go_db.products (id) ON UPDATE RESTRICT ON DELETE RESTRICT
 	)`
+	psqlCreateInvoiceItem = `INSERT INTO go_db.invoice_items(invoice_header_id, product_id)
+							VALUES($1, $2) RETURNING id, created_at`
 )
 
 // PsqlInvoiceItem used for work with postgres - invoice_item
@@ -47,4 +51,27 @@ func (p *PsqlInvoiceItem) Migrate() error {
 	log.Println("Migración de invoiceItem ejecutada correctamente")
 
 	return nil
+}
+
+// CreateTx implement the interface invoiceitem.Storage
+func (p *PsqlInvoiceItem) CreateTx(tx *sql.Tx, headerID uint, ms invoiceitem.Models) error {
+	stmt, err := tx.Prepare(psqlCreateInvoiceItem)
+
+	if err != nil {
+		return err
+	}
+	defer stmt.Close()
+
+	for _, item := range ms {
+		err = stmt.QueryRow(headerID, item.ProductID).Scan(
+			&item.ID,
+			&item.CreatedAt,
+		)
+		if err != nil {
+			return err
+		}
+	}
+
+	return err
+
 }
