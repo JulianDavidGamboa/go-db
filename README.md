@@ -85,7 +85,7 @@ default:
 }
 ```
 
-# Actualizar producto
+# Actualizar un producto
 
 ```go
 storageProduct := storage.NewPsqlProduct(storage.Pool())
@@ -103,4 +103,18 @@ err := serviceProduct.Update(m)
 if err != nil {
 	log.Fatalf("product.Update: %v", err)
 }
+```
+
+# Eliminar un producto
+
+```go
+storageProduct := storage.NewPsqlProduct(storage.Pool())
+serviceProduct := product.NewService(storageProduct)
+
+err := serviceProduct.Delete(1)
+
+if err != nil {
+	log.Fatalf("product.Delete: %v", err)
+}
+
 ```
