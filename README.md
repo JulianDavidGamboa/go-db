@@ -85,7 +85,7 @@ default:
 }
 ```
 
-# Actualizar producto
+# Actualizar un producto
 
 ```go
 storageProduct := storage.NewPsqlProduct(storage.Pool())
